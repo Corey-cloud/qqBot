@@ -8,8 +8,10 @@ import (
 	"strings"
 )
 
+type WordsMap map[string]string
+
 //从文件中读取成语和其释义
-func getWordsFromFile() map[string]string {
+func getWordsFromFile() WordsMap {
 	Map := make(map[string]string)
 	f, err := os.Open("words.txt")
 	if err != nil {
@@ -29,10 +31,10 @@ func getWordsFromFile() map[string]string {
 }
 
 //获取初始成语
-func getBeginWord(words map[string]string) string {
+func (ws WordsMap) getBeginWord() string {
 	i := 0
 	//map无序，随机取第10个，每次结果不同
-	for word := range words {
+	for word := range ws {
 		if i == 9 {
 			return word
 		}
@@ -42,9 +44,9 @@ func getBeginWord(words map[string]string) string {
 }
 
 //根据用户回复获取接龙成语
-func getWord(word string, words map[string]string) string {
+func (ws WordsMap) getWord(word string) string {
 	lastStr := string([]rune(word)[3:])
-	for word, _ := range words {
+	for word, _ := range ws {
 		if string([]rune(word)[:1]) == lastStr {
 			return word
 		}
@@ -53,13 +55,13 @@ func getWord(word string, words map[string]string) string {
 }
 
 //判断成语是否合法
-func isWordLegal(word string, words map[string]string) bool {
-	_, ok := words[word]
+func (ws WordsMap) isWordLegal(word string) bool {
+	_, ok := ws[word]
 	return len([]rune(word)) == 4 && ok == true
 }
 
 //判断是否接龙成功
-func isWordDragon(word string, preWord string) bool {
+func (ws WordsMap) isWordDragon(word string, preWord string) bool {
 	if word != "" && preWord != "" {
 		flag := string([]rune(word)[:1]) == string([]rune(preWord)[3:])
 		return flag
@@ -68,6 +70,6 @@ func isWordDragon(word string, preWord string) bool {
 }
 
 //获取成语释义
-func getWordMeaning(word string, words map[string]string) string {
-	return words[word]
+func (ws WordsMap) getWordMeaning(word string) string {
+	return ws[word]
 }

@@ -34,11 +34,11 @@ var lastWord string
 var play = false
 
 // ProcessMessage is a function to process message
-func (p Processor) ProcessMessage(input string, data *dto.WSATMessageData, words map[string]string) error {
+func (p Processor) ProcessMessage(input string, data *dto.WSATMessageData, ws WordsMap) error {
 	ctx := context.Background()
 	cmd := message.ParseCommand(input)
 
-	beginWord := getBeginWord(words)
+	beginWord := ws.getBeginWord()
 
 	switch cmd.Cmd {
 	case CmdWordDragon:
@@ -54,16 +54,16 @@ func (p Processor) ProcessMessage(input string, data *dto.WSATMessageData, words
 		}
 	default:
 		if play {
-			if isWordLegal(cmd.Cmd, words) && isWordDragon(cmd.Cmd, lastWord) {
-				nextWord := getWord(cmd.Cmd, words)
+			if ws.isWordLegal(cmd.Cmd) && ws.isWordDragon(cmd.Cmd, lastWord) {
+				nextWord := ws.getWord(cmd.Cmd)
 				p.sendReplyByString(ctx, data.ID, data.ChannelID, nextWord)
 				lastWord = nextWord
 			} else if cmd.Cmd == CmdExplainWord {
-				value := getWordMeaning(lastWord, words)
+				value := ws.getWordMeaning(lastWord)
 				p.sendReplyByString(ctx, data.ID, data.ChannelID, value)
-			} else if !isWordLegal(cmd.Cmd, words) {
+			} else if !ws.isWordLegal(cmd.Cmd) {
 				p.sendReplyByString(ctx, data.ID, data.ChannelID, NotWordTip)
-			} else if !isWordDragon(cmd.Cmd, lastWord) {
+			} else if !ws.isWordDragon(cmd.Cmd, lastWord) {
 				p.sendReplyByString(ctx, data.ID, data.ChannelID, NotMatchDragonTip)
 			}
 		} else {
